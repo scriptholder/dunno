@@ -1,4 +1,4 @@
--- Arqel UI System - Cleaned Recreation
+-- Dead Hub UI System
 local genv = getgenv()
 
 -- Core Services
@@ -10,11 +10,11 @@ local Workspace = game:GetService('Workspace')
 local Lighting = game:GetService('Lighting')
 
 -- State Management
-genv.ArqelLoaded = genv.ArqelLoaded or false
-genv.ArqelClosed = genv.ArqelClosed or false
+genv.DeadHubLoaded = genv.DeadHubLoaded or false
+genv.DeadHubClosed = genv.DeadHubClosed or false
 
-if genv.ArqelLoaded then 
-    return genv.Arqel
+if genv.DeadHubLoaded then 
+    return genv.DeadHub
 end
 
 -- Configuration
@@ -38,8 +38,8 @@ local Config = {
     Icon = 'rbxassetid://95721401302279'
 }
 
--- Main Arqel System
-local Arqel = {
+-- Main Dead Hub System
+local DeadHub = {
     Options = {
         Blur = true,
         Draggable = true
@@ -56,19 +56,19 @@ local Arqel = {
     Storage = {
         AutoLoad = true,
         Remember = true,
-        FileName = 'Arqel_Key'
+        FileName = 'DeadHub_Key'
     },
     Theme = Config.Colors,
     Appearance = {
         IconSize = Config.IconSize,
-        Title = 'Arqel',
+        Title = 'Dead Hub',
         Subtitle = 'Enter your key to continue',
         Icon = Config.Icon
     }
 }
 
 -- Notification System
-function Arqel:Notify(icon, title, message, duration)
+function DeadHub:Notify(icon, title, message, duration)
     duration = duration or 3
     
     local viewport = Workspace.CurrentCamera.ViewportSize
@@ -186,30 +186,37 @@ function Arqel:Notify(icon, title, message, duration)
 end
 
 -- Key Management Functions
-function Arqel:ClearSavedKey()
+function DeadHub:ClearSavedKey()
     delfile(self.Storage.FileName .. '.txt')
     return true
 end
 
-function Arqel:GetSavedKey()
+function DeadHub:GetSavedKey()
     return nil
 end
 
 -- Main Launch Function
-function Arqel:Launch()
-    if genv.ArqelLoaded then return end
-    genv.ArqelLoaded = true
+function DeadHub:Launch()
+    if genv.DeadHubLoaded then 
+        self:Notify(Config.Icon, 'Dead Hub', 'System already running!', 2)
+        return 
+    end
+    
+    genv.DeadHubLoaded = true
     
     -- Remove existing UI
-    local existingUI = CoreGui:FindFirstChild('ArqelKeySystem') or CoreGui:FindFirstChild('ArqelKeylessSystem')
+    local existingUI = CoreGui:FindFirstChild('DeadHubKeySystem') or CoreGui:FindFirstChild('DeadHubKeylessSystem')
     if existingUI then existingUI:Destroy() end
     
-    local blur = Lighting:FindFirstChild('ArqelKeySystemBlur')
+    local blur = Lighting:FindFirstChild('DeadHubKeySystemBlur')
     if blur then blur:Destroy() end
+    
+    -- Show initialization notification
+    self:Notify(Config.Icon, 'Dead Hub', 'System initialized', 2)
     
     -- Create main key system UI
     local screenGui = Instance.new('ScreenGui')
-    screenGui.Name = 'ArqelKeySystem'
+    screenGui.Name = 'DeadHubKeySystem'
     screenGui.ResetOnSpawn = false
     screenGui.IgnoreGuiInset = true
     screenGui.Parent = CoreGui
@@ -263,6 +270,26 @@ function Arqel:Launch()
     headerTitle.TextXAlignment = Enum.TextXAlignment.Left
     headerTitle.Parent = header
     
+    -- Subtitle
+    local subtitleLabel = Instance.new('TextLabel')
+    subtitleLabel.Size = UDim2.new(1, 0, 0, 20)
+    subtitleLabel.Position = UDim2.new(0.5, 0, 0, 120)
+    subtitleLabel.AnchorPoint = Vector2.new(0.5, 0)
+    subtitleLabel.BackgroundTransparency = 1
+    subtitleLabel.Text = self.Appearance.Subtitle
+    subtitleLabel.TextColor3 = Config.Colors.TextDim
+    subtitleLabel.TextSize = 15
+    subtitleLabel.Font = Enum.Font.GothamBold
+    subtitleLabel.Parent = mainFrame
+    
+    -- Divider
+    local divider = Instance.new('Frame')
+    divider.Size = UDim2.new(1, 0, 0, 3)
+    divider.Position = UDim2.new(0, 0, 0, 148)
+    divider.BackgroundColor3 = Config.Colors.Divider
+    divider.BorderSizePixel = 0
+    divider.Parent = mainFrame
+    
     -- Close button
     local closeButton = Instance.new('ImageButton')
     closeButton.Size = UDim2.new(0, 18, 0, 18)
@@ -283,8 +310,10 @@ function Arqel:Launch()
     end)
     
     closeButton.MouseButton1Click:Connect(function()
-        genv.ArqelClosed = true
+        genv.DeadHubClosed = true
         screenGui:Destroy()
+        local blur = Lighting:FindFirstChild('DeadHubKeySystemBlur')
+        if blur then blur:Destroy() end
     end)
     
     -- Input field
@@ -382,6 +411,8 @@ function Arqel:Launch()
             self:Notify(Config.Icon, 'Success', 'Key validated successfully!', 2)
             task.wait(0.5)
             screenGui:Destroy()
+            local blur = Lighting:FindFirstChild('DeadHubKeySystemBlur')
+            if blur then blur:Destroy() end
             self.Callbacks.OnSuccess()
         else
             self:Notify(Config.Icon, 'Error', 'Invalid key, please try again.', 3)
@@ -424,6 +455,7 @@ function Arqel:Launch()
     discordButton.MouseButton1Click:Connect(function()
         if self.Links.Discord ~= '' then
             -- Open discord link logic here
+            print('Opening Discord:', self.Links.Discord)
         end
     end)
     
@@ -435,7 +467,7 @@ function Arqel:Launch()
     -- Blur effect
     if self.Options.Blur then
         local blur = Instance.new('BlurEffect')
-        blur.Name = 'ArqelKeySystemBlur'
+        blur.Name = 'DeadHubKeySystemBlur'
         blur.Size = 0
         blur.Parent = Lighting
         
@@ -446,7 +478,7 @@ function Arqel:Launch()
 end
 
 -- Set global
-genv.ArqelLoaded = true
-genv.Arqel = Arqel
+genv.DeadHubLoaded = true
+genv.DeadHub = DeadHub
 
-return Arqel
+return DeadHub
